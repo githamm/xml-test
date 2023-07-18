@@ -1,0 +1,91 @@
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script>
+    $.ajax({
+        type: "GET",
+        url: "election_data.xml",
+        dataType: "xml",
+        success: function(xml) {
+            //console.log(xml);
+            // Parse the xml file and get data
+            // var xmlDoc = $.parseXML(xml),
+            $xml = $(xml);
+            //     console.log(xmlDoc);
+            // $xml.find('category logo').each(function() {
+            //     $("#container").append($(this).text() + "<br />");
+            // });
+
+            $contests = $xml.find("Contest");
+            const races = {};
+            $contests.each(function(index, element) {
+                if (element.attributes["text"]) {
+                    //testArray.push(element.attributes["text"].value);
+                    races[index] = { raceName: element.attributes["text"].value }
+
+                    // const raceCandidates = [];
+                    // const candidates = {};
+                    // $choices = $xml.find("Choice");
+                    // $choices.each(function(index, element) {
+                    //     if (element.attributes["text"]) {
+                    //         races[index] = { candidateName: element.attributes["text"].value, totalVotes: element.attributes["totalVotes"].value }
+                    //     }
+                    // })
+                    //raceCandidates.push(candidates);
+                    //console.log(races);
+                }
+            })
+
+            // Changes XML to JSON
+            // From https://davidwalsh.name/convert-xml-json
+            function xmlToJson(xml) {
+
+                // Create the return object
+                var obj = {};
+
+                if (xml.nodeType == 1) { // element
+                    // do attributes
+                    if (xml.attributes.length > 0) {
+                        obj["@attributes"] = {};
+                        for (var j = 0; j < xml.attributes.length; j++) {
+                            var attribute = xml.attributes.item(j);
+                            obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+                        }
+                    }
+                } else if (xml.nodeType == 3) { // text
+                    obj = xml.nodeValue;
+                }
+
+                // do children
+                if (xml.hasChildNodes()) {
+                    for (var i = 0; i < xml.childNodes.length; i++) {
+                        var item = xml.childNodes.item(i);
+                        var nodeName = item.nodeName;
+                        if (typeof(obj[nodeName]) == "undefined") {
+                            obj[nodeName] = xmlToJson(item);
+                        } else {
+                            if (typeof(obj[nodeName].push) == "undefined") {
+                                var old = obj[nodeName];
+                                obj[nodeName] = [];
+                                obj[nodeName].push(old);
+                            }
+                            obj[nodeName].push(xmlToJson(item));
+                        }
+                    }
+                }
+                return obj;
+            };
+            let test = xmlToJson(xml);
+            //console.log(test.ElectionResult.Contest[0].Choice[0]["@attributes"]);
+            console.log(test.ElectionResult.Contest);
+        }
+    });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,180 @@
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <!-- <span id="num"></span> <span id="street"></span><br /> <span id="city"></span>, <span id="state"></span> <span id="zip"></span> -->
+    <script>
+    // txt = "<address>" +
+    //     "<street>Roble Ave</street>" +
+    //     "<mtfcc>S1400</mtfcc>" +
+    //     "<streetNumber>649</streetNumber>" +
+    //     "<lat>37.45127</lat>" +
+    //     "<lng>-122.18032</lng>" +
+    //     "<distance>0.04</distance>" +
+    //     "<postalcode>94025</postalcode>" +
+    //     "<placename>Menlo Park</placename>" +
+    //     "<adminCode2>081</adminCode2>" +
+    //     "<adminName2>San Mateo</adminName2>" +
+    //     "<adminCode1>CA</adminCode1>" +
+    //     "<adminName1>California</adminName1>" +
+    //     "<countryCode>US</countryCode>" +
+    //     "</address>";
+
+    // if (window.DOMParser) {
+    //     parser = new DOMParser();
+    //     xmlDoc = parser.parseFromString(txt, "text/xml");
+    // } else // Internet Explorer
+    // {
+    //     xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+    //     xmlDoc.async = false;
+    //     xmlDoc.loadXML(txt);
+    // }
+
+    // document.getElementById("num").innerHTML =
+    //     xmlDoc.getElementsByTagName("streetNumber")[0].childNodes[0].nodeValue;
+    // document.getElementById("street").innerHTML =
+    //     xmlDoc.getElementsByTagName("street")[0].childNodes[0].nodeValue;
+    // document.getElementById("city").innerHTML =
+    //     xmlDoc.getElementsByTagName("adminName2")[0].childNodes[0].nodeValue;
+    // document.getElementById("state").innerHTML =
+    //     xmlDoc.getElementsByTagName("adminCode1")[0].childNodes[0].nodeValue;
+    // document.getElementById("zip").innerHTML =
+    //     xmlDoc.getElementsByTagName("postalcode")[0].childNodes[0].nodeValue;
+    // $.ajax({
+    //     type: "GET",
+    //     url: "test.xml",
+    //     dataType: "xml",
+
+    //     error: function(e) {
+    //         alert("An error occurred while processing XML file");
+    //         console.log("XML reading Failed: ", e);
+    //     },
+
+    //     success: function(doc) {
+    //         console.log(doc);
+    //         var x = xmlhttp.responseXML.documentElement.getElementsByTagName("Type");
+    //         for (var i = 0; i < x.length; i++) {
+    //             var subTypes = new Array();
+    //             var y = x[i].getElementsByTagName("SubTypes")
+    //             for (var j = 0; j < y.length; j++) {
+    //                 subTypes.push(y[j])
+    //                 // or you could just process them here
+    //                 console.log(subTypes);
+    //             }
+
+    //             // process the subtypes in this type
+
+    //         }
+    //     }
+    // });
+    </script>
+
+    <body>
+        <div class="container">
+            <div class="jumbotron" style="text-align: center;">
+                <h1 id="headerTitle">Food Menu List</h1>
+            </div>
+            <h3></h3>
+            <ul></ul>
+        </div>
+        <script>
+        // Do some stuff when page hmtl page is launched
+        $(document).ready(function() {
+
+            $("#headerTitle").hide(300).show(1500);
+            // calling show food menu function
+            showFoodMenu();
+
+            // If you want to fetch data from the file 
+            // call fetch data function instead of showFoodMenu
+            // fetchData()
+        });
+
+        // ***************************************************************************************
+        // this function calls showfoodmenu 3000 milisecond to get new changes                   *
+        // made on demo.xml                                                                      *
+        // ***************************************************************************************
+        function fetchData() {
+            setTimeout(function() {
+                showFoodMenu();
+                // recursive call
+                fetchData();
+            }, 3000);
+        }
+
+        // **************************************************************************************
+        // read data from demo.xml using Jquery | AJAX                                          *
+        // **************************************************************************************
+        function showFoodMenu() {
+
+            $.ajax({
+                type: "GET",
+                url: "./election_data.xml",
+                dataType: "xml",
+
+                error: function(e) {
+                    alert("An error occurred while processing XML file");
+                    console.log("XML reading Failed: ", e);
+                },
+
+                success: function(data) {
+                	console.log(data);
+                    // make sure the ul is empty
+                    // before appending data inot it
+                    // $("ul").children().remove();
+
+                    // $(response).find("food").each(function() {
+                    //     var _name = 'Name: ' + $(this).find('name').text();
+                    //     console.log(_name);
+
+                    //     var _price = 'Price: ' + $(this).find('price').text();
+                    //     var _calories = 'Calories: ' + $(this).find('calories').text();
+                    //     var _description = 'Description: ' + $(this).find('description').text();
+
+                    //     // add content to the HTML          
+                    //     $("ul").append('<li>' + _name + '</li>');
+                    //     $("ul").append('<li>' + _price + '</li>');
+                    //     $("ul").append('<li>' + _calories + '</li>');
+                    //     $("ul").append('<li>' + _description + '</li>');
+                    // });
+
+                    var output = {};
+
+                    $(data).find('Contest').each(function() {
+
+                        // Define our user data
+                        $role = $(this);
+                        role = $role.find('Contest.text').text(); // "Impacted users" or "Stakeholders"
+
+                        output[role] = [];
+
+                        // Loop through the roles and create an object of data
+                        $role.find('text').each(function() {
+                            // Define our data for the iteration
+                            $user = $(this);
+                            // Create our object
+                            output[role].push({
+                                reqUser: $user.find('isQuestion').text(),
+                                //reqFirst: $user.find('userFirstName').text(),
+                                //reqLast: $user.find('userLastName').text(),
+                                //reqNTID: $user.find('userNTID').text()
+                            });
+                        })
+
+                        // Set our array for the specific role in iteration to the object we created
+
+                    });
+
+                    // Debug
+                    console.log(output);
+                }
+            });
+        }
+        </script>
+        <!-- ****************************************** END ***************************************** -->
+    </body>
+
+</html>
