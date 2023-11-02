@@ -9,7 +9,7 @@
     <script>
     $.ajax({
         type: "GET",
-        url: "election_data.xml",
+        url: "election_data_2021.xml",
         dataType: "xml",
         success: function(xml) {
             //console.log(xml);
@@ -81,9 +81,116 @@
                 return obj;
             };
             let test = xmlToJson(xml);
+            let allRaceData = test.ElectionResult.Contest;
             //console.log(test.ElectionResult.Contest[0].Choice[0]["@attributes"]);
-            console.log(test.ElectionResult.Contest);
-        }
+            // console.log(allRaceData);
+            // //console.log(test.ElectionResult.Contest[0]["@attributes"]);
+            // console.log(test.ElectionResult.Contest[5]["@attributes"].text);
+            // console.log(allRaceData[5]["@attributes"].text);
+            // console.log(test.ElectionResult.Contest[5].Choice[0]["@attributes"].text);
+            // console.log(test.ElectionResult.Contest[5].Choice[0]["@attributes"].totalVotes);
+            // console.log(test.ElectionResult.Contest[5].Choice.length);
+            // console.log(allRaceData.length);
+            //console.log(allRaceData);
+
+            let racesList = [];
+            for (var i = 0; i < allRaceData.length; i++) {
+                var thingtoAdd = {};
+                thingtoAdd['raceName'] = allRaceData[i]['@attributes'].text;
+                racesList.push(thingtoAdd);
+            };
+            //console.log(racesList);
+
+            let finalResults = [];
+            for (var i = 0; i < allRaceData.length; i++) {
+                var thingtoAdd = {};
+                //if (results[0].data[i]['Conversions'] != null && results[0].data[i]['Conversions'] != '') {
+                //thingtoAdd['raceName'] = allRaceData[i]['@attributes'].text;
+                //finalResults.push(thingtoAdd);
+                for (var j = 0; j < allRaceData[i].Choice.length; j++) { // not getting Choice objects with only one entry b/c they're not arrays
+                    var raceData = {};
+                    raceData['raceName'] = allRaceData[i]['@attributes'].text;
+                    raceData['candidate'] = allRaceData[i].Choice[j]["@attributes"].text;
+                    raceData['votes'] = allRaceData[i].Choice[j]["@attributes"].totalVotes;
+                    finalResults.push(raceData);
+                }
+            }
+            console.log(finalResults);
+
+            // const arr = [
+            //     { name: "qewregf dqewafs", value: "qewregf dqewafs answer", count: 2 },
+            //     { name: "survey with select", value: "survey with select answer", count: 2 },
+            //     { name: "werasd", value: "Donald", count: 1 },
+            //     { name: "werasd", value: "Jim", count: 1 }
+            // ];
+
+            /*** const result = arr.reduce((acc, d) => {
+                const found = acc.find(a => a.name === d.name);
+                //const value = { name: d.name, val: d.value };
+                const value = { value: d.value, count: d.count }; // the element in data property
+                if (!found) {
+                    //acc.push(...value);
+                    acc.push({ name: d.name, data: [value] }) // not found, so need to add data property
+                } else {
+                    //acc.push({ name: d.name, data: [{ value: d.value }, { count: d.count }] });
+                    found.data.push(value) // if found, that means data property exists, so just push new element to found.data.
+                }
+                return acc;
+            }, []); ***/
+
+            const result = finalResults.reduce((acc, d) => {
+                const found = acc.find(a => a.raceName === d.raceName);
+                //const value = { name: d.name, val: d.value };
+                const candidateName = { candidateName: d.candidate, voteTotal: d.votes }; // the element in data property
+                if (!found) {
+                    //acc.push(...value);
+                    acc.push({ raceName: d.raceName, candidates: [candidateName] }) // not found, so need to add data property
+                } else {
+                    //acc.push({ name: d.name, data: [{ value: d.value }, { voteTotal: d.voteTotal }] });
+                    found.candidates.push(candidateName) // if found, that means data property exists, so just push new element to found.data.
+                }
+                return acc;
+            }, []);
+
+            //console.log(result)
+
+            const testArray = Object.groupBy(finalResults, ({ raceName }) => raceName);
+            //console.log(testArray);
+
+            let resultsTest = [];
+            for (var i = 0; i < allRaceData.length; i++) {
+                for (var j = 0; j < allRaceData[i].Choice.length; j++) { // not getting Choice objects with only one entry b/c they're not arrays
+                    var raceData = {};
+                    raceData = allRaceData[i]['@attributes'];
+                    raceData['candidate'] = allRaceData[i].Choice;
+                    resultsTest.push(raceData);
+                }
+            }
+            console.log(resultsTest);
+
+            const testArray2 = Object.groupBy(resultsTest, ({ text }) => text);
+            console.log(testArray2);
+
+            let undefinedTest = [];
+            for (var i = 0; i < allRaceData.length; i++) {
+                var thingtoAdd = {};
+                if (allRaceData[i].Choice.length == undefined) {
+                    thingtoAdd['raceName'] = allRaceData[i]['@attributes'].text;
+                    thingtoAdd['candidate'] = allRaceData[i].Choice['@attributes'].text;
+                    thingtoAdd['votes'] = allRaceData[i].Choice['@attributes'].totalVotes;
+                    undefinedTest.push(thingtoAdd);
+                }
+            }
+
+            console.log(undefinedTest)
+
+            let bigMamaResults = (finalResults.concat(undefinedTest));
+            console.log(bigMamaResults);
+            const bigDaddyResults = Object.groupBy(bigMamaResults, ({ raceName }) => raceName);
+            console.log(bigDaddyResults);
+
+
+        } // Closes function(xml)
     });
     </script>
 </body>
