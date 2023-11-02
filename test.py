@@ -1,8 +1,24 @@
-import xmltodict
+import csv
 import json
-xml_file=open("election_data_2021.xml","r")
-xml_string=xml_file.read()
-python_dict=xmltodict.parse(xml_string)
-json_string=json.dumps(python_dict)
-print("The JSON string is:")
-print(json_string)
+
+def csv_to_json(csvFilePath, jsonFilePath):
+    jsonArray = []
+
+    #reading csv (encoding is important)
+    with open(csvFilePath, encoding='utf-8') as csvf:
+        #csv library function
+        csvReader = csv.DictReader(csvf)
+
+        #convert each csv row into python dictionary
+        for column in csvReader:
+            #add this python dictionary to json array
+            jsonArray.append(column)
+
+    #convertion
+    with open(jsonFilePath, 'w', encoding='utf-8') as jsonf:
+        jsonString = json.dumps(jsonArray, indent=4)
+        jsonf.write(jsonString)
+
+csvFilePath='election_results_2021.csv'
+jsonFilePath='output_2021.json'
+csv_to_json(csvFilePath, jsonFilePath)

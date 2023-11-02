@@ -2,10 +2,24 @@
 
 <head>
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
 </head>
 
 <body>
-    <div id="container"></div>
+    <div id="displayArea"></div>
+    <!-- <script id="myTemplate" type="text/x-handlebars-template">
+        {{#each candidates}}
+        <h1>Employee Name : {{this.name}}, Age : {{this.age}}</h1>
+        {{/each}} -->
+    <script id="myTemplate" type="text/x-handlebars-template">
+        {{#each this}}
+            {{raceName}}<br>
+        {{/each}}
+    </script>
+    <script>
+    var tmpHtml = document.getElementById("myTemplate").innerHTML;
+    var template = Handlebars.compile(tmpHtml);
+    </script>
     <script>
     $.ajax({
         type: "GET",
@@ -115,7 +129,7 @@
                     finalResults.push(raceData);
                 }
             }
-            console.log(finalResults);
+            //console.log(finalResults);
 
             // const arr = [
             //     { name: "qewregf dqewafs", value: "qewregf dqewafs answer", count: 2 },
@@ -166,10 +180,10 @@
                     resultsTest.push(raceData);
                 }
             }
-            console.log(resultsTest);
+            //console.log(resultsTest);
 
             const testArray2 = Object.groupBy(resultsTest, ({ text }) => text);
-            console.log(testArray2);
+            //console.log(testArray2);
 
             let undefinedTest = [];
             for (var i = 0; i < allRaceData.length; i++) {
@@ -182,12 +196,12 @@
                 }
             }
 
-            console.log(undefinedTest)
+            //console.log(undefinedTest)
 
             let bigMamaResults = (finalResults.concat(undefinedTest));
-            console.log(bigMamaResults);
+            //console.log(bigMamaResults);
             const bigDaddyResults = Object.groupBy(bigMamaResults, ({ raceName }) => raceName);
-            console.log(bigDaddyResults);
+            //console.log(bigDaddyResults);
 
             let arr = [bigDaddyResults]
 
@@ -195,9 +209,12 @@
             let obj_all = { ...arr }
             console.log(obj_all)
 
-            console.log(Array.isArray(finalResults));
+            
+    var stuff = bigDaddyResults;
 
+            var html = template(stuff);
 
+            document.getElementById("displayArea").innerHTML += html;
         } // Closes function(xml)
     });
     </script>
