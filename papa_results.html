@@ -5,35 +5,36 @@
     <meta charset="utf-8">
     <meta name="robots" content="noindex,nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>2023 Colorado Election Results | The Denver Post</title>
     <link rel="shortcut icon" href="https://extras.mnginteractive.com/live/media/favIcon/dpo/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/foundation/6.2.4/foundation.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.14/c3.css" />
-    <link rel="stylesheet" type="text/css" href="https://extras.denverpost.com/libraries/datatables/DataTables-1.10.16/css/dataTables.foundation.min.css" />
-    <link rel="stylesheet" type="text/css" href="https://extras.denverpost.com/libraries/datatables/Responsive-2.2.1/css/responsive.foundation.min.css" />
-    <link rel="stylesheet" type="text/css" href="../styles.css" />
-    <!-- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" /> -->
     <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/foundation/6.2.4/foundation.min.js"></script>
     <script src="https://extras.denverpost.com/foundation/js/vendor/modernizr.js"></script>
-    <script src="https://extras.denverpost.com/app/homicide-report/js/d3.v3.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.14/c3.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/1.0.11/jquery.csv.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://extras.denverpost.com/libraries/datatables/jQuery-3.2.1/jquery-3.2.1.min.js"></script>
-    <script src="https://extras.denverpost.com/libraries/datatables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
-    <script src="https://extras.denverpost.com/libraries/datatables/DataTables-1.10.16/js/dataTables.foundation.min.js"></script>
-    <script src="https://extras.denverpost.com/libraries/datatables/Responsive-2.2.1/js/dataTables.responsive.min.js"></script>
-    <script src="https://extras.denverpost.com/libraries/datatables/Responsive-2.2.1/js/responsive.foundation.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/yadcf/0.9.2/jquery.dataTables.yadcf.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
-    <script src="https://cdn.datatables.net/plug-ins/1.10.24/sorting/datetime-moment.js"></script>
-    <script src="https://kit.fontawesome.com/206988eca2.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
 </head>
 
 <body>
+    <!-- Handlebars template -->
+<script id="template2" type="text/x-handlebars-template">
+    {{#Chapters}}
+        <table>
+            <tr>
+        <td>{{name}}</td>
+    </tr>
+    
+        {{#each value}}
+            <tr><td>{{choiceName}}</td><td>{{choicePct}}</td></tr>
+        {{/each}}</table>
+        {{/Chapters}}
+    </ul>
+</script>
+
+
+<div id="main"></div>
     <script>
-    // Loads data files into Papa Parse
+    // Load data files into Papa Parse
     urls = ['election_results_2021.csv']
     Promise.all( //pass array of promises to Promise.all
             urls //you have an array of urls
@@ -66,17 +67,114 @@
                 var unique = raceNameList.filter(function(elem, index, self) {
                     return index === self.indexOf(elem);
                 })
-                console.log(unique)
+                //console.log(unique)
 
-                let map = new Map()
+                let modifiedResults = new Map()
                 rawElectionResults.forEach((currentValue) => {
-                    map.has(currentValue['contest name']) ?
-                        map.get(currentValue['contest name']).push({ raceName: currentValue['contest name'], choiceName: currentValue['choice name'], choiceVotes: currentValue['total votes'], choicePct: currentValue['percent of votes'], totalBallotsCast: currentValue['ballots cast'] }) :
-                        map.set(currentValue['contest name'], [{ raceName: currentValue['contest name'], choiceName: currentValue['choice name'], choiceVotes: currentValue['total votes'], choicePct: currentValue['percent of votes'], totalBallotsCast: currentValue['ballots cast'] }])
+                    modifiedResults.has(currentValue['contest name']) ?
+                        modifiedResults.get(currentValue['contest name']).push({ raceName: currentValue['contest name'], choiceName: currentValue['choice name'], choiceVotes: currentValue['total votes'], choicePct: currentValue['percent of votes'], totalBallotsCast: currentValue['ballots cast'] }) :
+                        modifiedResults.set(currentValue['contest name'], [{ raceName: currentValue['contest name'], choiceName: currentValue['choice name'], choiceVotes: currentValue['total votes'], choicePct: currentValue['percent of votes'], totalBallotsCast: currentValue['ballots cast'] }])
                 });
-                console.log(map);
+                //console.log(modifiedResults); // This is the Map
 
+                const jsonResults = JSON.stringify(Object.fromEntries(modifiedResults));
+                let finalResults = Array.from(modifiedResults, ([name, value]) => ({ name, value }));
+                console.log(finalResults)
 
+                // Handlebars
+                var source = document.getElementById('template2').innerHTML;
+    var template = Handlebars.compile(source);
+    var data = [
+        {
+                "ChapterName" : "Introduction",
+                "chapterNum" : "1",
+                "movies" : [
+                        {
+                        "movieIDnum" : "16244028",
+                        "movieName" : "Update Test Movie 0",
+                        "movieFileName" : "Test0.mov",
+                        "moviePositionInChapter" : "1"
+                        }
+                ]
+        },
+        {
+            "ChapterName" : "Welcome",
+            "chapterNum" : "2",
+            "movies" : [
+                    {
+                    "movieIDnum" : " 17322365",
+                    "movieName" : "Update Test movie 1",
+                    "movieFileName" : "Test1.mov",
+                    "moviePositionInChapter" : "1"
+                    },
+                    {
+                    "movieIDnum" : " 17326267",
+                    "movieName" : "Update Test movie 3",
+                    "movieFileName" : "Test3.mov",
+                    "moviePositionInChapter" : "2"
+                    }
+            ]
+        },
+        {
+            "ChapterName" : "The new Interface",
+            "chapterNum" : "2",
+            "movies" : [
+                {
+                "movieIDnum" : " 1732123476",
+                "movieName" : "Update Test movie 12",
+                "movieFileName" : "Test12.mov",
+                "moviePositionInChapter" : "1"
+                },
+                {
+                "movieIDnum" : " 173262373",
+                "movieName" : "Update Test movie 9",
+                "movieFileName" : "Test9.mov",
+                "moviePositionInChapter" : "2"
+                },
+                {
+                "movieIDnum" : " 173273474",
+                "movieName" : "Update Test movie 10",
+                "movieFileName" : "Test10.mov",
+                "moviePositionInChapter" : "3"
+                }
+            ]
+        },
+        {
+            "ChapterName" : "What is an Update?",
+            "chapterNum" : "4",
+            "movies" : [
+                {
+                "movieIDnum" : " 177342131",
+                "chapterNum" : "4",
+                "chapterName" : "What is an Update?",
+                "movieName" : "Test movie again",
+                "movieFileName" : "Test13.mov",
+                "moviePositionInChapter" : "1"
+                }
+                ]
+        },
+        {
+            "ChapterName" : "Editing",
+            "chapterNum" : "5",
+            "movies" : [
+                {
+                "movieIDnum" : " 173290878",
+                "movieName" : "Update Test movie 14",
+                "movieFileName" : "Test14mov",
+                "moviePositionInChapter" : "1"
+                },
+                {
+                "movieIDnum" : " 177344914",
+                "movieName" : " Movie 15 Test",
+                "movieFileName" : "Test233.mov",
+                "moviePositionInChapter" : "2"
+                }
+            ]
+        }
+    ];
+
+    var result = template({Chapters: finalResults});
+    document.write(result);
             } // end results
         )
         .catch( //log the error

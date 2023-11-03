@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2023 Colorado Election Results | The Denver Post</title>
+    <link rel="shortcut icon" href="https://extras.mnginteractive.com/live/media/favIcon/dpo/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/foundation/6.2.4/foundation.min.css" />
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/foundation/6.2.4/foundation.min.js"></script>
+    <script src="https://extras.denverpost.com/foundation/js/vendor/modernizr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
+    <style>
+        table {
+            width: 100%;
+            table-layout: fixed;
+        }
+        .outer-bar {
+            width: 100%;
+        }
+        .inner-bar {
+            background: lightblue;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Handlebars template -->
+    <script id="results-template" type="text/x-handlebars-template">
+        
+            <table style="width:100%;table-layout:fixed">
+    <thead>
+        <tr>
+            <th style="width:30%"></th>
+            <th style="width:60%"></th>
+            <th style="width:10%"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#Races}}
+        <tr>
+            <td colspan="3">{{name}}</td>
+        </tr>
+        {{#each value}}
+        <tr>
+            <td>{{choiceName}}</td>
+            <td><span class="outer-bar"><span class="inner-bar" style="width:{{choicePct}}%;background:lightblue;display:inline-block">{{choicePct}}</span></span></td>
+            <td>{{choiceVotes}}</td>
+        </tr>
+        {{/each}}
+        {{/Races}}
+    </tbody>
+</table>
+    </script>
+    <!-- <table>
+            <thead>
+              <tr>
+                {{#each array.[0]}}
+                  <th>{{@key}}</th>
+                {{/each}}
+              </tr>
+            </thead>
+            <tbody>
+              {{#each array}}
+                <tr>
+                    {{#each this}}
+                    <td>{{this}}</td>
+                  {{/each}}
+                </tr>
+              {{/each}}
+            </tbody>
+         </table>
+    -->
+    <script>
+    var rawElectionResults;
+    Papa.parse('./election_results_2021.csv', {
+        header: true,
+        download: true,
+        dynamicTyping: true,
+        complete: function(results) {
+            rawElectionResults = results.data;
+            // var raceNameList = [];
+            // for (i = 0; i < rawElectionResults.length; i++) {
+            //     var thingtoAdd = {};
+            //     thingtoAdd = rawElectionResults[i]['contest name']
+            //     raceNameList.push(thingtoAdd);
+            // }
+            // var unique = raceNameList.filter(function(elem, index, self) {
+            //     return index === self.indexOf(elem);
+            // })
+            //console.log(unique)
+
+            var modifiedResults = new Map()
+            rawElectionResults.forEach((currentValue) => {
+                modifiedResults.has(currentValue['contest name']) ?
+                    modifiedResults.get(currentValue['contest name']).push({ raceName: currentValue['contest name'], choiceName: currentValue['choice name'], choiceVotes: currentValue['total votes'], choicePct: currentValue['percent of votes'], totalBallotsCast: currentValue['ballots cast'] }) :
+                    modifiedResults.set(currentValue['contest name'], [{ raceName: currentValue['contest name'], choiceName: currentValue['choice name'], choiceVotes: currentValue['total votes'], choicePct: currentValue['percent of votes'], totalBallotsCast: currentValue['ballots cast'] }])
+            });
+            //console.log(modifiedResults); // This is the Map
+
+            //var jsonResults = JSON.stringify(Object.fromEntries(modifiedResults));
+            var finalResults = Array.from(modifiedResults, ([name, value]) => ({ name, value }));
+            //console.log(finalResults)
+
+            // Handlebars
+            var source = document.getElementById('results-template').innerHTML;
+            var template = Handlebars.compile(source);
+
+
+            var result = template({ Races: finalResults });
+            document.write(result);
+        }
+    });
+    </script>
+</body>
+
+</html>
