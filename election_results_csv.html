@@ -14,67 +14,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" integrity="sha512-dfX5uYVXzyU8+KHqj8bjo7UkOdg18PaOtpa48djpNbZHwExddghZ+ZmzWT06R5v6NSk3ZUfsH6FNEDepLx9hPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.6/handlebars.min.js"></script>
     <style>
-        table {
-            width: 100%;
-            table-layout: fixed;
-        }
-        .outer-bar {
-            width: 100%;
-        }
-        .inner-bar {
-            background: lightblue;
-            display: inline-block;
-        }
     </style>
 </head>
 
 <body>
     <!-- Handlebars template -->
     <script id="results-template" type="text/x-handlebars-template">
-        
-            <table style="width:100%;table-layout:fixed">
+        <table style="width:100%;table-layout:fixed;font-family:sans-serif;">
     <thead>
         <tr>
-            <th style="width:30%"></th>
-            <th style="width:60%"></th>
+            <th style="width:35%"></th>
+            <th style="width:55%"></th>
             <th style="width:10%"></th>
         </tr>
     </thead>
     <tbody>
         {{#Races}}
         <tr>
-            <td colspan="3">{{name}}</td>
+            <td colspan="3" style="font-size:16px;font-weight:bold;padding-top:5px;border-top:1px solid lightgray">{{raceName}}</td>
         </tr>
-        {{#each value}}
+        {{#each raceCandidates}}
         <tr>
-            <td>{{choiceName}}</td>
-            <td><span class="outer-bar"><span class="inner-bar" style="width:{{choicePct}}%;background:lightblue;display:inline-block">{{choicePct}}</span></span></td>
-            <td>{{choiceVotes}}</td>
+            <td style="padding:2px;font-size:14px;text-align:right">{{choiceName}}</td>
+            <td style="padding:2px"><div id="container" style="width:100%"><div style="height:15px;width:70%;display:inline-block"><div style="width:{{choicePct}}%;height:15px;background:#F4A460;display:inline-block"></div></div><div style="display:inline-block;margin-left:5px;vertical-align:top;font-size:14px">{{choicePct}}%</div></div></td>
+            <td style="padding:2px;font-size:14px">{{choiceVotes}}</td>
         </tr>
         {{/each}}
         {{/Races}}
     </tbody>
 </table>
     </script>
-    <!-- <table>
-            <thead>
-              <tr>
-                {{#each array.[0]}}
-                  <th>{{@key}}</th>
-                {{/each}}
-              </tr>
-            </thead>
-            <tbody>
-              {{#each array}}
-                <tr>
-                    {{#each this}}
-                    <td>{{this}}</td>
-                  {{/each}}
-                </tr>
-              {{/each}}
-            </tbody>
-         </table>
-    -->
     <script>
     var rawElectionResults;
     Papa.parse('./election_results_2021.csv', {
@@ -94,6 +63,7 @@
             // })
             //console.log(unique)
 
+            // Convert the raw election data into a map with a more friendly structure
             var modifiedResults = new Map()
             rawElectionResults.forEach((currentValue) => {
                 modifiedResults.has(currentValue['contest name']) ?
@@ -102,16 +72,54 @@
             });
             //console.log(modifiedResults); // This is the Map
 
-            //var jsonResults = JSON.stringify(Object.fromEntries(modifiedResults));
-            var finalResults = Array.from(modifiedResults, ([name, value]) => ({ name, value }));
-            //console.log(finalResults)
+            // Convert the map to an array to use with Handlebars
+            var allRaceResults = Array.from(modifiedResults, ([raceName, raceCandidates]) => ({ raceName, raceCandidates }));
+            console.log(allRaceResults)
+
+
+            // const data = [{ menuName: "Hot dogs", menu: [{ dishId: '1', dish_has_categories: [{ CategoryId: '8' }] }, { dishId: '2', dish_has_categories: [{ CategoryId: '9' }] }] }, { menuName: "Burgers", menu: [{ dishId: '3', dish_has_categories: [{ CategoryId: '6' }] }, { dishId: '4', dish_has_categories: [{ CategoryId: '4' }] }] }, { name: "Drinks", menu: [] }]
+
+            // const res = data.filter(x =>
+            //     x.menu.some(y =>
+            //         y.dish_has_categories.some(z => z.CategoryId === '8')
+            //     )
+            // );
+            // console.log(res)
+
+            const topRaceResults = allRaceResults.filter(x =>
+                x.raceCandidates.some(y => y.raceName === 'Amendment 78 (CONSTITUTIONAL) (Vote For 1)' || y.raceName === 'Proposition 119 (STATUTORY) (Vote For 1)' || y.raceName === 'Adams-Arapahoe School District 28J Board of Directors - At-Large (Vote For 4)')
+            );
+            console.log(topRaceResults)
+
+
+
+
+            // var testy = [];
+            // for (let p of allRaceResults) {
+            //     for (let i of p.raceName) {
+            //         //var substring = 'School';
+            //         //var hello = p.name;
+            //         //    if (hello.includes(substring)) {testy.push(p);}
+            //     }
+            //     //console.log(p.raceName)
+            // }
+
+            //}
+            // for (var key in allRaceResults) {
+            //     var obj = allRaceResults[key];
+            //     if (obj.name.includes('Arapahoe')) {
+            //         testy.push(obj)
+            //         break
+            //     }
+            // }
+            // console.log(testy)
 
             // Handlebars
             var source = document.getElementById('results-template').innerHTML;
             var template = Handlebars.compile(source);
 
 
-            var result = template({ Races: finalResults });
+            var result = template({ Races: allRaceResults });
             document.write(result);
         }
     });
