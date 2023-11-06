@@ -23,21 +23,23 @@
         <table style="width:100%;table-layout:fixed;font-family:sans-serif;">
     <thead>
         <tr>
-            <th style="width:35%"></th>
-            <th style="width:55%"></th>
+            <th style="width:30%"></th>
+            <th style="width:45%"></th>
+            <th style="width:15%"></th>
             <th style="width:10%"></th>
         </tr>
     </thead>
     <tbody>
         {{#Races}}
         <tr>
-            <td colspan="3" style="font-size:16px;font-weight:bold;padding-top:5px;border-top:1px solid lightgray">{{raceName}}</td>
+            <td colspan="3" style="font-size:16px;font-weight:bold;line-height:normal"><div style="margin-top:25px">{{raceName}}</div></td>
         </tr>
         {{#each raceCandidates}}
         <tr>
-            <td style="padding:2px;font-size:14px;text-align:right">{{choiceName}}</td>
-            <td style="padding:2px"><div id="container" style="width:100%"><div style="height:15px;width:70%;display:inline-block"><div style="width:{{choicePct}}%;height:15px;background:#F4A460;display:inline-block"></div></div><div style="display:inline-block;margin-left:5px;vertical-align:top;font-size:14px">{{choicePct}}%</div></div></td>
-            <td style="padding:2px;font-size:14px">{{choiceVotes}}</td>
+            <td style="padding-right:5px;font-size:14px;text-align:right;line-height:normal">{{choiceName}}</td>
+            <td><div style="width:{{choicePct}}%;height:15px;background:#F4A460;margin-bottom:-3px"></div></td>
+            <td style="padding-left:4px;font-size:14px;text-align:left">{{choicePct}}%</td>
+            <td style="font-size:14px;text-align:left">{{choiceVotes}}</td>
         </tr>
         {{/each}}
         {{/Races}}
